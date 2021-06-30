@@ -1,0 +1,33 @@
+#SOMALIER:
+###################################Create .somalier files from gvcfs (directory in which you run needs to have somaler software, also need fasta reference and 
+sites.hg38.vcf.gz
+
+for f in `cat gvcfz.txt`; do ./somalier extract -d extracted --sites /proj/heinzenlab/users/meethila1/sites.hg38.vcf.gz -f /proj/heinzenlab/projects/somaticNov2020/analysisfiles/GRCh38.d1.vd1.fa $f; done
+
+##################################make pedigree files (.ped) to check for relatedness , using module load vcftools 
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -n 6
+#SBATCH -p general
+#SBATCH --nice=30 
+#SBATCH -t 07-00:00:00
+#SBATCH --mem=4g
+module load vcftools
+
+for f in `cat list4.txt`; do FILENAME=`basename ${f%.*}`; n=`basename ${FILENAME%.*}`; m=`basename ${n%.*}` ; vcftools --gzvcf ${f} --plink --out ${m}; done
+
+###list4 contails all paths to gvcfs
+
+######################################Running relatedness on somalier 
+
+./somalier relate --ped /proj/heinzenlab/users/meethila1/ped_test/dukeepi5203br.ped *.somalier
+
+
+##############################Check ancestry using 1000genomes project as reference
+
+./somalier ancestry --labels /proj/heinzenlab/users/meethila1/extracted/ancestry-labels-1kg.tsv /proj/heinzenlab/users/meethila1/extracted/1kg-somalier/*.somalier ++ /proj/heinzenlab/users/meethila1/extracted/*.somalier
+
+
+
+#############################somalier prints out interractive html files and tsv files with all parameters 
+
