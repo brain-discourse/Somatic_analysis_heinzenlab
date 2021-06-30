@@ -1,0 +1,265 @@
+GATK legacy: germline calling 
+https://sites.google.com/a/broadinstitute.org/legacy-gatk-forum-discussions/tutorials/2806-how-to-apply-hard-filters-to-a-call-set 
+
+
+1. combine gvcfs by chromosome
+####sample map file 
+fcde191bl	/overflow/heinzenlab/UNCbams.fastq/exome/fcde191bl/bams/fcde191bl.g.vcf.gz
+fcde191br	/overflow/heinzenlab/UNCbams.fastq/exome/fcde191br/bams/fcde191br.g.vcf.gz
+COLE122BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE122BR/bams/COLE122BR.g.vcf.gz
+COLE133BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE133BR/bams/COLE133BR.g.vcf.gz
+COLE138BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE138BR/bams/COLE138BR.g.vcf.gz
+COLE141BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE141BR/bams/COLE141BR.g.vcf.gz
+COLE149BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE149BR/bams/COLE149BR.g.vcf.gz
+erka111hip	/overflow/heinzenlab/UNCbams.fastq/exome/erka111hip/bams/erka111hip.g.vcf.gz
+erka111leuko	/overflow/heinzenlab/UNCbams.fastq/exome/erka111leuko/bams/erka111leuko.g.vcf.gz
+erka116c	/overflow/heinzenlab/UNCbams.fastq/exome/erka116c/bams/erka116c.g.vcf.gz
+erka116leuko	/overflow/heinzenlab/UNCbams.fastq/exome/erka116leuko/bams/erka116leuko.g.vcf.gz
+erka120core	/overflow/heinzenlab/UNCbams.fastq/exome/erka120core/bams/erka120core.g.vcf.gz
+erka120leuko	/overflow/heinzenlab/UNCbams.fastq/exome/erka120leuko/bams/erka120leuko.g.vcf.gz
+erka12amre	/overflow/heinzenlab/UNCbams.fastq/exome/erka12amre/bams/erka12amre.g.vcf.gz
+erka12pbmc	/overflow/heinzenlab/UNCbams.fastq/exome/erka12pbmc/bams/erka12pbmc.g.vcf.gz
+erka33c	/overflow/heinzenlab/UNCbams.fastq/exome/erka33c/bams/erka33c.g.vcf.gz
+erka33leuko	/overflow/heinzenlab/UNCbams.fastq/exome/erka33leuko/bams/erka33leuko.g.vcf.gz
+erka112pbmc	/overflow/heinzenlab/UNCbams.fastq/exome/erka112pbmc/bams/erka112pbmc.g.vcf.gz
+erka112stg	/overflow/heinzenlab/UNCbams.fastq/exome/erka112stg/bams/erka112stg.g.vcf.gz
+erka115a	/overflow/heinzenlab/UNCbams.fastq/exome/erka115a/bams/erka115a.g.vcf.gz
+erka115pbmc	/overflow/heinzenlab/UNCbams.fastq/exome/erka115pbmc/bams/erka115pbmc.g.vcf.gz
+erka11fl	/overflow/heinzenlab/UNCbams.fastq/exome/erka11fl/bams/erka11fl.g.vcf.gz
+erka11leuko	/overflow/heinzenlab/UNCbams.fastq/exome/erka11leuko/bams/erka11leuko.g.vcf.gz
+erka13mt	/overflow/heinzenlab/UNCbams.fastq/exome/erka13mt/bams/erka13mt.g.vcf.gz
+erka13saliva	/overflow/heinzenlab/UNCbams.fastq/exome/erka13saliva/bams/erka13saliva.g.vcf.gz
+erka22l	/overflow/heinzenlab/UNCbams.fastq/exome/erka22l/bams/erka22l.g.vcf.gz
+erka22leuko	/overflow/heinzenlab/UNCbams.fastq/exome/erka22leuko/bams/erka22leuko.g.vcf.gz
+erka23l	/overflow/heinzenlab/UNCbams.fastq/exome/erka23l/bams/erka23l.g.vcf.gz
+erka23leuko	/overflow/heinzenlab/UNCbams.fastq/exome/erka23leuko/bams/erka23leuko.g.vcf.gz
+erka24l	/overflow/heinzenlab/UNCbams.fastq/exome/erka24l/bams/erka24l.g.vcf.gz
+erka24leuko	/overflow/heinzenlab/UNCbams.fastq/exome/erka24leuko/bams/erka24leuko.g.vcf.gz
+COLE120BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE120BR/bams/COLE120BR.g.vcf.gz
+COLE139BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE139BR/bams/COLE139BR.g.vcf.gz
+COLE145BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE145BR/bams/COLE145BR.g.vcf.gz
+COLE152BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE152BR/bams/COLE152BR.g.vcf.gz
+COLE155BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE155BR/bams/COLE155BR.g.vcf.gz
+COLE160BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE160BR/bams/COLE160BR.g.vcf.gz
+erka31l	/overflow/heinzenlab/UNCbams.fastq/exome/erka31l/bams/erka31l.g.vcf.gz
+erka31leuko	/overflow/heinzenlab/UNCbams.fastq/exome/erka31leuko/bams/erka31leuko.g.vcf.gz
+MCD19035BR	/overflow/heinzenlab/UNCbams.fastq/exome/MCD19035BR/bams/MCD19035BR.g.vcf.gz
+MCDBOSE212BR	/overflow/heinzenlab/UNCbams.fastq/exome/MCDBOSE212BR/bams/MCDBOSE212BR.g.vcf.gz
+MCDBOSE216BR	/overflow/heinzenlab/UNCbams.fastq/exome/MCDBOSE216BR/bams/MCDBOSE216BR.g.vcf.gz
+MCDBOSE339BR	/overflow/heinzenlab/UNCbams.fastq/exome/MCDBOSE339BR/bams/MCDBOSE339BR.g.vcf.gz
+MCDBOSE359BR	/overflow/heinzenlab/UNCbams.fastq/exome/MCDBOSE359BR/bams/MCDBOSE359BR.g.vcf.gz
+MCDGG14016BR	/overflow/heinzenlab/UNCbams.fastq/exome/MCDGG14016BR/bams/MCDGG14016BR.g.vcf.gz
+MCDGG17008BR	/overflow/heinzenlab/UNCbams.fastq/exome/MCDGG17008BR/bams/MCDGG17008BR.g.vcf.gz
+MCDGG18036BR	/overflow/heinzenlab/UNCbams.fastq/exome/MCDGG18036BR/bams/MCDGG18036BR.g.vcf.gz
+MCDGG18139BR	/overflow/heinzenlab/UNCbams.fastq/exome/MCDGG18139BR/bams/MCDGG18139BR.g.vcf.gz
+
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -n 6
+#SBATCH -p general
+#SBATCH --nice=30 
+#SBATCH -t 07-00:00:00
+#SBATCH --mem=130g
+
+module add samtools 
+module add biobambam2
+module add bbmap
+module add bwa/0.7.15
+module add java
+module add picard/2.21.7
+module add gatk/4.1.7.0
+
+gatk --java-options "-Xmx60g -Xms60g" GenomicsDBImport --genomicsdb-workspace-path /proj/heinzenlab/projects/somaticNov2020/germline/genomics_workspace_chr2  --batch-size 50 --sample-name-map /proj/heinzenlab/projects/somaticNov2020/germline/sample_map.map -R /proj/heinzenlab/projects/somaticNov2020/analysisfiles/GRCh38.d1.vd1.fa --consolidate true --reader-threads 5 -L chr2
+
+
+2. joint genotyping 
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -n 6
+#SBATCH -p general
+#SBATCH --nice=30 
+#SBATCH -t 07-00:00:00
+#SBATCH --mem=120g
+
+module add samtools 
+module add biobambam2
+module add bbmap
+module add bwa/0.7.15
+module add java
+module add picard/2.21.7
+module add gatk/4.1.7.0
+
+gatk --java-options "-Xmx40g -Xms40g -XX:ParallelGCThreads=4" GenotypeGVCFs \
+ -R /proj/heinzenlab/projects/somaticNov2020/analysisfiles/GRCh38.d1.vd1.fa \
+-V gendb:///proj/heinzenlab/projects/somaticNov2020/germline/genomics_workspace_chr2 \
+ -G StandardAnnotation \
+ -O /proj/heinzenlab/projects/somaticNov2020/germline/genotyped_chr2.vcf 
+
+
+ 3. Filter SNPS
+ #!/bin/bash
+#SBATCH -N 1
+#SBATCH -n 6
+#SBATCH -p general
+#SBATCH --nice=30 
+#SBATCH -t 07-00:00:00
+#SBATCH --mem=130g
+
+module add samtools 
+module add biobambam2
+module add bbmap
+module add bwa/0.7.15
+module add java
+module add picard
+module add gatk/4.1.7.0
+
+gatk --java-options "-Xmx40g -Xms40g"  SelectVariants -V genotyped_chr2.vcf  --select-type-to-include SNP -O joint_snps.vcf \
+
+echo "SNPS selected" \
+
+gatk --java-options "-Xmx40g -Xms40g" VariantFiltration -V joint_snps.vcf --filter-expression "QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0" --filter-name "my_snp_filter" -O filtered_snps_2.vcf \
+
+echo "done-success"
+
+joint_genotypye_output.vcf
+
+4. Filter Indels 
+##############wrapper
+
+#!/bin/bash
+
+for filename in /proj/heinzenlab/projects/somaticNov2020/germline/genotyped_vcfs/*.vcf
+
+do 
+
+sbatch --time=100:00:00 --mem=80g --job-name Indel --wrap="sh /proj/heinzenlab/projects/somaticNov2020/germline/genotyped_vcfs/Hardfilter_SNPs $filename"
+sleep 1
+done
+
+
+###########real indel script 
+#!/bin/bash
+
+filename=$1
+
+module add samtools 
+module add biobambam2
+module add bbmap
+module add bwa/0.7.15
+module add java
+module add picard
+module add gatk/4.1.7.0
+
+gatk --java-options "-Xmx40g -Xms40g"  SelectVariants -V "$filename" --select-type-to-include INDEL -O $(basename "$filename" .ext).temp \
+
+echo "Indels selected" \
+
+gatk --java-options "-Xmx40g -Xms40g" VariantFiltration -V $(basename "$filename" .ext).temp --filter-expression "QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0" --filter-name "my_indel_filter" -O $(basename "$filename" .ext).indel \
+
+echo "done-success"
+
+
+
+
+#####merge all vcf files (after using L command to split them by chr)
+
+#!/bin/bash
+
+	#SBATCH -N 1
+	#SBATCH -n 6
+	#SBATCH -p general
+	#SBATCH --nice=30 
+	#SBATCH -t 07-00:00:00
+#SBATCH --mem=80g
+
+
+module add samtools 
+module add biobambam2
+module add bbmap
+module add bwa/0.7.15
+module add java
+module add picard
+module add gatk/4.1.7.0
+
+gatk --java-options "-Xmx40g -Xms40g" GatherVcfs -I  vcf_file_list.txt -O joint_genotypye_output.vcf
+
+
+############merge indels and snp vcf's together 
+#!/bin/bash
+
+#SBATCH -N 1
+#SBATCH -n 6
+#SBATCH -p general
+#SBATCH --nice=30 
+#SBATCH -t 07-00:00:00
+#SBATCH --mem=80g
+
+
+module add samtools 
+module add biobambam2
+module add bbmap
+module add bwa/0.7.15
+module add java
+module add picard
+module add gatk/4.1.7.0
+
+gatk --java-options "-Xmx40g -Xms40g" MergeVcfs -I joint_snps.vcf -I joint_indel.vcf -O allvar.vcf
+
+
+
+##########################################################All files- snp indel filters########################################################
+
+ cat Hardfilter_Indels_2.sh 
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -n 6
+#SBATCH -p general
+#SBATCH --nice=30 
+#SBATCH -t 07-00:00:00
+#SBATCH --mem=130g
+
+module add samtools 
+module add biobambam2
+module add bbmap
+module add bwa/0.7.15
+module add java
+module add picard
+module add gatk/4.1.7.0
+
+gatk --java-options "-Xmx40g -Xms40g"  SelectVariants -V joint_genotypye_output.vcf --select-type-to-include INDEL  -O joint_indel.vcf \
+
+echo "Indel selected" \
+
+gatk --java-options "-Xmx40g -Xms40g" VariantFiltration -V joint_indel.vcf --filter-expression "QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0" --filter-name "my_indel_filter" -O filtered_indels_2.vcf \
+
+echo "done-success"
+[meethila@longleaf-login2 scripts_bychr]$ cat Hardfilter_SNPs_2 
+#!/bin/bash
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -n 6
+#SBATCH -p general
+#SBATCH --nice=30 
+#SBATCH -t 07-00:00:00
+#SBATCH --mem=130g
+
+module add samtools 
+module add biobambam2
+module add bbmap
+module add bwa/0.7.15
+module add java
+module add picard
+module add gatk/4.1.7.0
+
+gatk --java-options "-Xmx40g -Xms40g"  SelectVariants -V joint_genotypye_output.vcf  --select-type-to-include SNP -O joint_snps.vcf \
+
+echo "SNPS selected" \
+
+gatk --java-options "-Xmx40g -Xms40g" VariantFiltration -V joint_snps.vcf --filter-expression "QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0" --filter-name "my_snp_filter" -O filtered_snps_all.vcf \
+
+echo "done-success"
+
+
+
+Rscript ReadInBams.R --bams bam.list --bed chr1.bed --fasta /proj/heinzenlab/projects/somaticNov2020/analysisfiles/GRCh38.d1.vd1.fa --out DEContest
+
