@@ -252,7 +252,7 @@ find . -name '*output.txt' | xargs wc -l
 
 #########################################Add header of merged file/file that has all desired cols incl sample name to this MERGED file########################################
 
-sed -i "1s/^/$(head -n1 file_with_headers)\n/" while_you_wanna_edit
+sed -i "1s/^/$(head -n1 file_with_headers)\n/" file_you_want_to_edit
 
 #############################################Alignment checks- all cols tab separated#########################################################################
 #perl script
