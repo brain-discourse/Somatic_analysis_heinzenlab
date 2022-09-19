@@ -1,0 +1,263 @@
+#Coverage normalization 
+Coverage normalization: 
+this script normalizes cases and controls for coverage 
+
+ 
+1. Select samples that have >=80% CCDS overall 50-fold coverage
+2. Create a matrix of the individual site level coverage for cases and controls separately
+3. Inspect the matrix at every site and only select sites where 90% of the samples have atleast 50reads  (for cases and controls separately)
+4. Merge case and control matrix by site and only keep sites where 90% of the samples have atleast 50reads 
+5. Assign a CCDS transcript to each site based on position
+6. Assess how may transcripts are atleast 50% covered (26,972 out of 31,737 transcripts):the coverage is calculated by adding all the sites (length new) and comparing it to the actual length of the CCDS trnascript
+7. Filter transcripts that are atleast 50% covered and collapse the number of reads at every transcript (taking the mean coverage of all the sites that are in that transcript)
+8. Merge with Gene-CCDS_NMID file to get genes that correspond to that transcript 
+
+########################################################generate matrix for all samples covered >=80 CCDS 50x ( coveragematrix.r)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(data.table)
+#files <- list.files(path="/proj/heinzenlab/projects/somaticNov2020/coverage/coveragebybase.txt")
+files<-list.files(c("/proj/heinzenlab/projects/somaticNov2020/coverage/COLE120BR/",
+"/proj/heinzenlab/projects/somaticNov2020/coverage/dukeepi3141br2/",
+"/proj/heinzenlab/projects/somaticNov2020/coverage/MCDGG19004BR/",
+"/proj/heinzenlab/projects/somaticNov2020/coverage/UTH0031BR/",
+"/proj/heinzenlab/projects/somaticNov2020/coverage/MCDBOSE212BR/",
+"/proj/heinzenlab/projects/somaticNov2020/coverage/UTH0031BR/"), pattern="coverage$", full.names = TRUE)
+sites <- read.table(files[1], header=FALSE, sep=",")[,1]     # gene names
+df    <- do.call(cbind,lapply(files,function(fn)read.table(fn,header=FALSE, sep=",")[,4]))
+df    <- cbind(sites,df)
+df<-as.data.frame(df)
+write.table(df, "site_matrix_table.txt")
+write_tsv(df, "site_matrix.txt")
+q()
+
+
+#####merge cases and controls matrix into one and then filter again for <50 reads in 90% of the samples (filter_merge_filter.r)
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(data.table)
+#files <- list.files(path="/proj/heinzenlab/projects/somaticNov2020/coverage/coveragebybase.txt")
+files<-list.files(c("/proj/heinzenlab/projects/somaticNov2020/coverage/UMB1474-pfc-1b123/",
+"/proj/heinzenlab/projects/somaticNov2020/coverage/UMB1499-pfc-1b1/",
+"/proj/heinzenlab/projects/somaticNov2020/coverage/UMB1712-pfc-1b12/",
+"/proj/heinzenlab/projects/somaticNov2020/coverage/UMB4548-pfc-1b1/",
+"/proj/heinzenlab/projects/somaticNov2020/coverage/UMB4672-pfc-1b12_200x/",
+"/overflow/heinzenlab/dbgap-NABEC/coverage/UMARY-794_combined/",
+"/overflow/heinzenlab/dbgap-NABEC/coverage/UMARY-914/"), pattern="coverage$", full.names = TRUE)
+sites <- read.table(files[1], header=FALSE, sep=",")[,1]     # gene names
+df    <- do.call(cbind,lapply(files,function(fn)read.table(fn,header=FALSE, sep=",")[,4]))
+df    <- cbind(sites,df)
+df<-as.data.frame(df)
+write.table(df, "site_matrix_table.txt")
+write_tsv(df, "site_matrix.txt")
+q()
+
+#######################################Filter both cases and controls individually for <50 reads in 90% of the samples (coverage_normalization.r)
+library(data.table)
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(tidyr)
+
+#site_matrix_demo <- read_delim("/proj/heinzenlab/projects/somaticNov2020/coverage/site_matrix.txt", 
+#    "\t", escape_double = FALSE, trim_ws = TRUE, 
+#    skip = 1)
+site_matrix_demo <-read.table("/proj/heinzenlab/projects/somaticNov2020/coverage/site_matrix.txt",header=T, sep="\t", stringsAsFactors=F, skip=1)
+#cases_matrix<-site_matrix_demo %>%
+ #    remove_rownames() %>%
+  #   column_to_rownames(var = 'Locus')
+
+cases_matrix_70x<-site_matrix_demo%>%
+  select(Locus, Depth_for_COLE120BR ,   Depth_for_COLE122BR   ,   Depth_for_COLE131BR,   
+Depth_for_COLE133BR  ,    Depth_for_COLE138BR    ,  Depth_for_COLE139BR,
+Depth_for_COLE141BR   ,   Depth_for_COLE153BR     , Depth_for_COLE155BR,
+Depth_for_COLE157BR    ,  Depth_for_COLE159BR      ,Depth_for_COLE160BR ,
+Depth_for_dukeepi2213br , Depth_for_dukeepi2488br  ,Depth_for_dukeepi2645br, 
+Depth_for_dukeepi2807br ,Depth_for_dukeepi2944br ,
+ Depth_for_dukeepi3066br , 
+,  Depth_for_UTH0018BR   ,   Depth_for_UTH0019BR     ,
+Depth_for_uth0020br     , Depth_for_uth0021br    ,  Depth_for_UTH0023BR     ,
+Depth_for_UTH0024BR      ,Depth_for_UTH0026BR     , Depth_for_UTH0027BR     ,
+Depth_for_UTH0028BR)
+
+cases_colnames<-c("Depth_for_COLE120BR"   ,   "Depth_for_COLE122BR"   ,   "Depth_for_COLE131BR",   
+"Depth_for_COLE133BR"  ,    "Depth_for_COLE138BR"    ,  "Depth_for_COLE139BR",
+"Depth_for_COLE141BR"   ,   "Depth_for_COLE153BR"     , "Depth_for_COLE155BR",
+   ,   "Depth_for_uth0015br"  ,    "Depth_for_uth0016br"     ,
+"Depth_for_uth0017br"    ,  "Depth_for_UTH0018BR"   ,   "Depth_for_UTH0019BR"     ,
+ "Depth_for_uth0021br"    ,  "Depth_for_UTH0023BR"     ,
+"Depth_for_UTH0024BR"      ,"Depth_for_UTH0026BR"     ,
+"Depth_for_UTH0028BR")
+
+
+
+is.na(cases_matrix_70x[cases_colnames]) <-  cases_matrix_70x[cases_colnames] < 50
+cases_matrix_70x<-cases_matrix_70x[which(rowMeans(!is.na(cases_matrix_70x)) > 0.9), ]
+
+write_tsv(cases_matrix_70x,"/proj/heinzenlab/projects/somaticNov2020/coverage/coverage_normalized_case_matrix_no_index")
+
+
+library(data.table)
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(tidyr)
+
+site_matrix_demo <-read.table("/overflow/heinzenlab/dbgap-NABEC/coverage/site_matrix.txt",header=T, sep="\t", stringsAsFactors=F, skip=1)
+#controls_matrix<-site_matrix_demo %>%
+ #    remove_rownames() %>%
+  #   column_to_rownames(var = 'Locus')
+controls_matrix_70x<-site_matrix_demo%>%
+  select(Locus, Depth_for_SH.00.38_combined  , 
+  Depth_for_SH.01.31,         Depth_for_SH.01.37_combined  
+,   Depth_for_SH.02.06_combined",
+"Depth_for_1465_1024.pfc.bulk",
+"Depth_for_4638_1024.pfc.bulk",
+"Depth_for_4643_1024.pfc.bulk",
+"Depth_for_UMB1024.pfc.1b12",
+"Depth_for_UMB1474.pfc.1b123",
+"Depth_for_UMB1499.pfc.1b1",
+"Depth_for_UMB1712.pfc.1b12",
+
+"Depth_for_UMB4548.pfc.1b1",
+"Depth_for_UMB4672.pfc.1b12_200x",
+"Depth_for_UMB4842.pfc.1b1",
+"Depth_for_UMB5161.pfc.1b1",
+"Depth_for_UMB5238.pfc.1b123",
+"Depth_for_UMB5391.pfc.1b12",
+"Depth_for_UMB818.pfc.1b1",
+"Depth_for_UMB914.pfc.1b12")
+is.na(controls_matrix_70x[controls_colnames]) <-  controls_matrix_70x[controls_colnames] < 50
+controls_matrix_70x<-controls_matrix_70x[which(rowMeans(!is.na(controls_matrix_70x)) > 0.9), ]
+write_tsv(controls_matrix_70x,"/overflow/heinzenlab/dbgap-NABEC/coverage/coverage_normalized_control_matrix_no_index")
+q()
+
+
+###############################################merge cases and controls matrix into one and then filter again for <50 reads in 90% of the samples (filter_merge_filter.r)
+
+library(data.table)
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(tidyr)
+
+controls <-read.table("/proj/heinzenlab/projects/somaticNov2020/coverage/coverage_normalized_control_matrix_no_index",header=T, sep="\t", stringsAsFactors=F)
+cases <-read.table("/proj/heinzenlab/projects/somaticNov2020/coverage/coverage_normalized_case_matrix_no_index",header=T, sep="\t", stringsAsFactors=F)
+my_samples<-c("Depth_for_SH.00.38_combined",
+"Depth_for_SH.01.31",
+"Depth_for_SH.01.37_combined",
+"Depth_for_SH.02.06_combined",
+"Depth_for_SH.03.28_combined",
+"Depth_for_SH.04.05_combined",
+"Depth_for_SH.04.19_combined",
+"Depth_for_SH.95.21_combined",
+"Depth_for_UMARY.1104_combined",
+"Depth_for_UMARY.1209_combined",
+"Depth_for_UMARY.1259",
+"Depth_for_UMARY.1274",
+"Depth_for_UMARY.1277",
+"Depth_for_UMARY.1379",
+"Depth_for_UMARY.1441",
+"Depth_for_UMARY.1455",          
+"Depth_for_UMARY.1461",
+"Depth_for_UMARY.1464",          
+"Depth_for_UMARY.1539",
+"Depth_for_UMARY.1583_combined",
+"Depth_for_UMARY.1668_combined",
+"Depth_for_UMARY.1675",
+"Depth_for_UMARY.1710_combined",
+"Depth_for_UMARY.1831",
+"Depth_for_UMARY.1841",
+"Depth_for_UMARY.1847_combined",
+"Depth_for_UMARY.1859",          
+"Depth_for_UMARY.1861",
+"Depth_for_UMARY.1866_combined",
+"Depth_for_UMARY.1935_combined",
+"Depth_for_UMARY.1936",
+"Depth_for_UMARY.260",
+"Depth_for_UMARY.290",
+"Depth_for_UMARY.4549_combined",
+"Depth_for_UMARY.4590_combined",
+"Depth_for_UMARY.4598_combined",
+"Depth_for_UMARY.4640_combined",
+"Depth_for_UMARY.4781",     	 
+"Depth_for_UMARY.4976",
+"Depth_for_UMARY.5087_combined", 
+"Depth_for_UMARY.5088",          
+"Depth_for_UMARY.5089_combined",
+"Depth_for_UMARY.5114",          
+"Depth_for_UMARY.5116",             
+"Depth_for_UMARY.5120",
+"Depth_for_UMARY.5123",  
+"Depth_for_UMARY.5179",
+"Depth_for_UMARY.794_combined",
+"Depth_for_1465_1024.pfc.bulk",
+"Depth_for_4638_1024.pfc.bulk",
+"Depth_for_4643_1024.pfc.bulk",
+"Depth_for_UMB1024.pfc.1b12",
+"Depth_for_UMB1474.pfc.1b123",
+"Depth_for_UMB1499.pfc.1b1",
+"Depth_for_UMB1712.pfc.1b12",
+
+"Depth_for_UMB4548.pfc.1b1",
+"Depth_for_UMB4672.pfc.1b12_200x",
+"Depth_for_UMB4842.pfc.1b1",
+"Depth_for_UMB5161.pfc.1b1",
+"Depth_for_UMB5238.pfc.1b123",
+"Depth_for_UMB5391.pfc.1b12",
+"Depth_for_UMB818.pfc.1b1",
+"Depth_for_UMB914.pfc.1b12",
+"Depth_for_MCDGG19004BR",
+"Depth_for_COLE120BR"   ,   "Depth_for_COLE122BR"   ,   "Depth_for_COLE131BR",   
+"Depth_for_COLE133BR"  ,    "Depth_for_COLE138BR"    ,  "Depth_for_COLE139BR",
+"Depth_for_COLE141BR"   ,   "Depth_for_COLE153BR"     , "Depth_for_COLE155BR",
+"Depth_for_COLE157BR"   ,  "Depth_for_COLE159BR"      ,"Depth_for_COLE160BR" ,
+"Depth_for_dukeepi2213br" , "Depth_for_dukeepi2488br"  ,"Depth_for_dukeepi2645br", 
+"Depth_for_dukeepi2807br" , "Depth_for_dukeepi2944br" ,
+ "Depth_for_dukeepi3066br" , 
+"Depth_for_dukeepi3125br" , "Depth_for_dukeepi3141br2" ,"Depth_for_dukeepi3143br" ,
+  "Depth_for_dukeepi3207br",  "Depth_for_dukeepi3209br" , "Depth_for_dukeepi3933br", 
+  "Depth_for_dukeepi4552br"  ,"Depth_for_dukeepi4560br" ,
+"Depth_for_dukeepi4578br"  ,"Depth_for_dukeepi5203br"  ,"Depth_for_dukeepi5208br"    ,"Depth_for_MCD19035BR"    ,
+ "Depth_for_mcdbose175br" ,  "Depth_for_mcdbose177br"  ,
+ "Depth_for_mcdbose198br",   "Depth_for_mcdbose206br" ,  "Depth_for_mcdbose207br"  ,
+"Depth_for_mcdbose208br"  , "Depth_for_mcdbose210br"   ,"Depth_for_MCDBOSE216BR"  ,
+"Depth_for_MCDBOSE219BR",   "Depth_for_mcdbose232br"   ,"Depth_for_mcdbose233br"  ,
+"Depth_for_mcdbose240br" ,  "Depth_for_mcdbose241br"   ,"Depth_for_mcdbose244br"  ,
+"Depth_for_mcdbose247br"  , "Depth_for_mcdbose248br"   ,"Depth_for_mcdbose252br"  ,
+ "Depth_for_mcdbose254br" ,  "Depth_for_mcdbose259br"   ,"Depth_for_mcdbose260br"  ,
+"Depth_for_mcdbose261br"  , "Depth_for_mcdbose265br2"  ,"Depth_for_mcdbose269br"  ,
+"Depth_for_mcdbose271br"  , "Depth_for_mcdbose274br"   ,"Depth_for_mcdbose275br"  ,
+"Depth_for_mcdbose276br"  , "Depth_for_mcdbose282br",   "Depth_for_mcdbose284br"  ,
+"Depth_for_mcdbose286br"   ,"Depth_for_mcdbose287br" ,  "Depth_for_mcdbose296br"  ,
+"Depth_for_mcdbose297br",   "Depth_for_mcdbose298br"  , "Depth_for_mcdbose304br"  ,
+"Depth_for_mcdbose309br"  ,"Depth_for_mcdbose316br2" ,
+"Depth_for_mcdbose320br"  , "Depth_for_mcdbose322br",   "Depth_for_mcdbose324br"  ,
+"Depth_for_mcdbose325br",   "Depth_for_mcdbose329br" ,  "Depth_for_mcdbose335br"  ,
+"Depth_for_MCDBOSE339BR" ,  "Depth_for_mcdbose340br"  , "Depth_for_mcdbose348br"  ,
+"Depth_for_mcdbose349br"  , "Depth_for_MCDBOSE359BR"   ,"Depth_for_MCDBOSE360BR"  ,
+"Depth_for_mcdbose362br",   "Depth_for_mcdbose363br",   "Depth_for_MCDBOSE364BR"  ,
+"Depth_for_mcdbose365br" ,  "Depth_for_mcdgg13004br" ,  
+"Depth_for_mcdgg15020br"  , "Depth_for_mcdgg15022br"  ,
+"Depth_for_mcdgg15037br"   ,"Depth_for_mcdgg16007br"   ,"Depth_for_mcdgg16011br"  ,
+"Depth_for_mcdgg17005br",   "Depth_for_mcdgg17013br",   "Depth_for_mcdgg17015br"  ,
+"Depth_for_mcdgg17025br" ,  "Depth_for_mcdgg17029br" ,  "Depth_for_mcdgg17030br"  ,
+"Depth_for_neuro1410F49br", "Depth_for_pmge174br"     ,
+"Depth_for_UTH0031BR", "Depth_for_MCDBOSE212BR",
+"Depth_for_uth0002br"      ,"Depth_for_uth0003br"     ,
+"Depth_for_uth0004br" ,     "Depth_for_uth0005br",      "Depth_for_uth0006br"     ,
+"Depth_for_uth0008br"  ,    "Depth_for_uth0009br" ,     "Depth_for_uth0012br"     ,
+"Depth_for_uth0013br"   ,   "Depth_for_uth0015br"  ,    "Depth_for_uth0016br"     ,
+"Depth_for_uth0017br"    ,  "Depth_for_UTH0018BR"   ,   "Depth_for_UTH0019BR"     ,
+"Depth_for_uth0021br"    ,  "Depth_for_UTH0023BR"     ,
+"Depth_for_UTH0024BR"      ,"Depth_for_UTH0026BR" ,
+"Depth_for_UTH0028BR")
+merged_matrix<-merge(cases,controls, by="Locus")
+is.na(merged_matrix[my_samples]) <-  merged_matrix[my_samples] < 50
+merged_matrix<-merged_matrix[which(rowMeans(!is.na(merged_matrix)) > 0.9), ]
+write_tsv(merged_matrix, "/proj/heinzenlab/projects/somaticNov2020/coverage/filtered_merged_filtered.txt")
+
+#########################################################check length of CCDS trnascript and remove any transcripts with less than 50% length 
