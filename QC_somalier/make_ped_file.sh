@@ -7,5 +7,5 @@
 #SBATCH -t 07-00:00:00
 #SBATCH --mem=4g
 module load vcftools
-
+# list4 contains path to all gvcfs
 for f in `cat list4.txt`; do FILENAME=`basename ${f%.*}`; n=`basename ${FILENAME%.*}`; m=`basename ${n%.*}` ; vcftools --gzvcf ${f} --plink --out ${m}; done
