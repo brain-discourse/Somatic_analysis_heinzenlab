@@ -1,0 +1,7 @@
+#!/bin/bash
+
+
+for i in *_final_output.txt; 
+do n="${i%_final_output.txt}" 
+mv $i $n.txt
+done
