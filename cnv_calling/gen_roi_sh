@@ -1,0 +1,4 @@
+#!/bin/bash
+filename=$1
+
+Rscript /proj/heinzenlab/projects/somaticNov2020/germline/CNV_MG/CNVRadar/CNV_Radar-master/bam2roi.r -b "$filename"  -d /proj/heinzenlab/projects/somaticNov2020/analysisfiles/CCDShg18exons+2bp.GRCh38.p12.CCDSv22.bed -z >> bam2roi.log 2>&1
