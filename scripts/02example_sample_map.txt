@@ -1,10 +1,7 @@
 ####sample map file 
-fcde191bl	/overflow/heinzenlab/UNCbams.fastq/exome/fcde191bl/bams/fcde191bl.g.vcf.gz
 fcde191br	/overflow/heinzenlab/UNCbams.fastq/exome/fcde191br/bams/fcde191br.g.vcf.gz
 COLE122BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE122BR/bams/COLE122BR.g.vcf.gz
 COLE133BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE133BR/bams/COLE133BR.g.vcf.gz
 COLE138BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE138BR/bams/COLE138BR.g.vcf.gz
 COLE141BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE141BR/bams/COLE141BR.g.vcf.gz
 COLE149BR	/overflow/heinzenlab/UNCbams.fastq/exome/COLE149BR/bams/COLE149BR.g.vcf.gz
-erka111hip	/overflow/heinzenlab/UNCbams.fastq/exome/erka111hip/bams/erka111hip.g.vcf.gz
-erka111leuko	/overflow/heinzenlab/UNCbams.fastq/exome/erka111leuko/bams/erka111leuko.g.vcf.gz
