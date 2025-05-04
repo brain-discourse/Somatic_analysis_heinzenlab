@@ -50,7 +50,7 @@ for file in $(cat samples.txt); do
   
   # ---------- STEP 3: HaplotypeCaller per Chr + Index ----------
   
-  for CHR in {1..22}; do
+  for CHR in {1..22} X Y; do
     GVCF_OUTPUT=$BAM_DIR/${SAMPLE_NAME}_chr${CHR}.g.vcf.gz
     LOG_OUT=$INPUT_DIR/$SAMPLE_NAME/${SAMPLE_NAME}.haplotypecaller_chr${CHR}.out
   
