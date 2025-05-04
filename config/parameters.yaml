@@ -1,0 +1,12 @@
+name: somatic_analysis_env
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - fastqc
+  - bwa
+  - gatk
+  - cnvkit
+  - annovar
+  - python=3.8
+  - snakemake
