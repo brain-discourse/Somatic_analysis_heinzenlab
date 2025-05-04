@@ -1,1 +1,0 @@
-./somalier ancestry --labels /proj/heinzenlab/users/meethila1/extracted/ancestry-labels-1kg.tsv /proj/heinzenlab/users/meethila1/extracted/1kg-somalier/*.somalier ++ /proj/heinzenlab/users/meethila1/extracted/*.somalier
