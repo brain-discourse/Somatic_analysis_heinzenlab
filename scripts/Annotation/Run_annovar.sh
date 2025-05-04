@@ -67,7 +67,7 @@ for SAMPLE in $(cat "$SAMPLES"); do
   -nastring . \
   -vcfinput \
 
-# ------------------ STEP 5: Filter based annotation  ------------------
+# ------------------ STEP 6: Merge all annotation outputs  ------------------
 python /proj/heinzenlab/users/meethila1/scripts/merge_annotations.py \
   --vcf_table "$VCF_TABLE_OUT" \
   --multianno "$AVOUTPUT.hg38_multianno.txt" \
