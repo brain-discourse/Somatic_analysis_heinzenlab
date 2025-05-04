@@ -80,3 +80,8 @@ jobid4=$(sbatch --dependency=afterok:$jobid2 -t 4- -n 20 -N 1 \
 echo $jobid4
 
 done
+
+
+#NOTE: Adapted from: GATK legacy: germline calling 
+#src: https://sites.google.com/a/broadinstitute.org/legacy-gatk-forum-discussions/tutorials/2806-how-to-apply-hard-filters-to-a-call-set 
+
