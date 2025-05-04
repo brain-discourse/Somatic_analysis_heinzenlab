@@ -7,6 +7,7 @@
 module load gatk/4.1.7.0 
 module add samtools/1.11
 module load annovar/20200609
+module load r/3.6.0
 
 
 
@@ -26,6 +27,7 @@ for SAMPLE in $(cat "$SAMPLES"); do
   VCF_TABLE_OUT="$DIR/${SAMPLE}_somatic_filtered.vcf.table"
   AVINPUT="$DIR/${SAMPLE}_somatic_filtered.avinput"
   AVOUTPUT="$DIR/${SAMPLE}_somatic_filtered.annotated"
+  FINAL_OUT="$DIR/${SAMPLE}_final_annotated_merged.tsv"
 
   # ------------------ STEP 1: Generate Unique Identifier ------------------
   bcftools annotate --set-id +'%CHROM:%POS:%REF:%FIRST_ALT' "$VCF_INPUT" > "$VCF_UID"
@@ -68,14 +70,54 @@ for SAMPLE in $(cat "$SAMPLES"); do
   -vcfinput \
 
 # ------------------ STEP 6: Merge all annotation outputs  ------------------
-python /proj/heinzenlab/users/meethila1/scripts/merge_annotations.py \
-  --vcf_table "$VCF_TABLE_OUT" \
-  --multianno "$AVOUTPUT.hg38_multianno.txt" \
-  --ccds "$DIR/${SAMPLE}_filtered.ccds" \
-  --jeme "$DIR/${SAMPLE}_filtered.jeme" \
-  --lincs "$DIR/${SAMPLE}_filtered.lincs" \
-  --output "$DIR/${SAMPLE}_final_annotated_merged.tsv"
-  
-  echo "****Annotation complete****" 
-done 
+Rscript - <<EOF
+    library(readr)
+    library(dplyr)
+    
+    cat("Merging annotations for: $SAMPLE\n")
+
+    #read output files and merge by UID
+    
+    Macro1 <- read_tsv("$VCF_TABLE_OUT", show_col_types = FALSE)
+    Macro2 <- read_tsv("${AVOUTPUT}.hg38_multianno.txt", show_col_types = FALSE)
+    
+    bed_list <- list(
+      read_tsv("${DIR}/${SAMPLE}_filtered.ccds.hg38_bed", show_col_types = FALSE),
+      read_tsv("${DIR}/${SAMPLE}_filtered.jeme.hg38_bed", show_col_types = FALSE),
+      read_tsv("${DIR}/${SAMPLE}_filtered.lincs.hg38_bed", show_col_types = FALSE)
+    )
+    
+    bed_list <- lapply(bed_list, function(df) {
+      df %>%
+        dplyr::select(1, 2, 3, 4, 5, 6, 7, 8, 10, 13) %>%
+        dplyr::rename(Bed_0 = 1, Bed_annotation = 2, Bed_Chr = 3, Bed_Start = 4, Bed_End = 5,
+                      Bed_Ref = 6, Bed_Alt = 7, Bed_1 = 8, Bed_2 = 9, ID = 10)
+    })
+    
+    bed_merged <- bind_rows(bed_list)
+    
+    vcf_bed_merged <- left_join(Macro1, bed_merged, by = "ID")
+
+    # add additional annotations
+    
+    ddg2p <- read_tsv("/proj/heinzenlab/users/meethila1/humandb/hg38_DDG2P_15_11_2020.txt", show_col_types = FALSE)
+    lof_metrics <- read_tsv("/proj/heinzenlab/users/meethila1/humandb/hg38_gnomad_lof_metrics.txt", show_col_types = FALSE)
+    lof_tool <- read_tsv("/proj/heinzenlab/users/meethila1/humandb/hg38_LoFtool_scores.txt", show_col_types = FALSE)
+    
+    annout1 <- left_join(Macro2, lof_tool, by = "Gene.refGene")
+    annout2 <- left_join(annout1, ddg2p, by = "Gene.refGene")
+    annout3 <- left_join(annout2, lof_metrics, by = "Gene.refGene")
+    
+    annout3 <- annout3 %>%
+      rename(ID = `Otherinfo6`)
+    
+    final_out <- left_join(annout3, vcf_bed_merged, by = "ID")
+    
+    write_tsv(final_out, "$FINAL_OUT")
+    cat("Merged output written to $FINAL_OUT\n")
+EOF
+
+  echo "Completed sample: $SAMPLE"
+
+done
 
