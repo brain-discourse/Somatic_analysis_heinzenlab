@@ -64,7 +64,7 @@ echo $jobid3
 jobid3=${jobid3##* }
 
 
-# ------------------ STEP 5: SelectVariants (INDELs) & VariantFiltration (INDELs) ------------------
+# ------------------ STEP 4: SelectVariants (INDELs) & VariantFiltration (INDELs) ------------------
 jobid4=$(sbatch --dependency=afterok:$jobid2 -t 4- -n 20 -N 1 \
   --output=$INPUT_DIR/filter_indel_${CHR}.out \
   --mem=60g -J filter_indel --wrap="gatk --java-options '-Xmx40g -Xms40g' \
@@ -81,6 +81,36 @@ echo $jobid4
 
 done
 
+# ------------------ STEP 5: Consolidate filtered SNPs and INDELs ------------------
+
+gatk --java-options "-Xmx40g -Xms40g" GatherVcfs -I  vcf_file_list.txt -O joint_genotypye_output.vcf
+
+picard GatherVcfs $(for i in {1..22}; do echo -I filtered_snps_ptato_chr${i}.vcf; done) -O final_filtered_snps_duke_ptato.vcf
+
+FILTERED_SNP_LIST=$INPUT_DIR/joint_filtered_snps_list.txt
+FILTERED_INDEL_LIST=$INPUT_DIR/joint_filtered_indels_list.txt
+RAW_SNP_LIST=$INPUT_DIR/joint_raw_snps_list.txt
+RAW_INDEL_LIST=$INPUT_DIR/joint_raw_indels_list.txt
+
+for CHR in {1..22} X Y; do
+  echo "$INPUT_DIR/filtered_snps_${CHR}.vcf" >> "$FILTERED_SNP_LIST"
+  echo "$INPUT_DIR/filtered_indels_${CHR}.vcf" >> "$FILTERED_INDEL_LIST"
+  echo "$INPUT_DIR/joint_snps_${CHR}.vcf" >> "$RAW_SNP_LIST"
+  echo "$INPUT_DIR/joint_indels_${CHR}.vcf" >> "$RAW_INDEL_LIST"
+done
+
+gatk --java-options "-Xmx40g" GatherVcfs \
+-I "$RAW_SNP_LIST" \
+-I "$RAW_INDEL_LIST" \
+-O "$INPUT_DIR/joint_genotyped_unfiltered_GATK_calls.vcf"
+
+# Combine filtered joint-called GVCFs
+gatk --java-options "-Xmx40g" GatherVcfs \
+  -I "$FILTERED_SNP_LIST" \
+  -I "$FILTERED_INDEL_LIST" \
+  -O "$INPUT_DIR/final_filtered_GATK_calls.vcf"
+
+echo "All VCFs gathered"
 
 #NOTE: Adapted from: GATK legacy: germline calling 
 #src: https://sites.google.com/a/broadinstitute.org/legacy-gatk-forum-discussions/tutorials/2806-how-to-apply-hard-filters-to-a-call-set 
