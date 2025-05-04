@@ -176,3 +176,14 @@ rename(variant_ID="ID")
 write_tsv(edited_csv, Outfile)
 }
 q()
+
+
+#########################################Rename all files
+
+#!/bin/bash
+
+
+for i in *_final_output.txt; 
+do n="${i%_final_output.txt}" 
+mv $i $n.txt
+done
