@@ -15,7 +15,7 @@ KNOWN_SITES1=/proj/heinzenlab/projects/somaticNov2020/analysisfiles/resources-br
 KNOWN_SITES2=/proj/heinzenlab/projects/somaticNov2020/analysisfiles/resources-broad-hg38-v0-Homo_sapiens_assembly38.known_indels.vcf.gz
 SAMPLE_MAP=$INPUT_DIR/sample_map.txt
 
-for CHR in chr{1..22} chrX; do
+for CHR in chr{1..22} chrX chrY; do
 
 # ------------------ STEP 1: GenomicsDBImport ------------------
 jobid1=$(sbatch -t 4- -n 20 -N 1 --output=$INPUT_DIR/combine_gvcf_${CHR}.out \
