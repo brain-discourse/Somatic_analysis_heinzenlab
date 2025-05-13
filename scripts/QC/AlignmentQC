@@ -1,0 +1,24 @@
+#------------------------ Picard collect alignment metrics----------------------------------------
+#!/bin/bash
+
+module load picard/2.26.11
+module load java/17.0.2
+
+outputdir=$1
+ref="/proj/seq/data/GATK_GRCh38/Homo_sapiens_assembly38.fasta" 
+
+while read line; do
+        sbatch --job-name="alignstats_${line}" --mem=8g -t 1- -n 24 -N 1 --wrap "picard CollectAlignmentSummaryMetrics -R $ref -I $outputdir/${line}.merged.marked.bam -O $outputdir/${line}.qc" 
+done < $outputdir/samples.txt
+
+#------------------------ Coverage: samtools----------------------------------------
+#!/bin/bash
+
+module add samtools/1.18
+
+outputdir=$1
+ref="/proj/seq/data/GATK_GRCh38/Homo_sapiens_assembly38.fasta" 
+
+while read line; do
+        sbatch --job-name="chr1cvg_${line}" --mem=8g -t 1- -n 24 -N 1 --wrap "samtools coverage -r chr1 $outputdir/${line}.merged.marked.bam -o $outputdir/${line}.chr1cvg" 
+done < $outputdir/samples.txt
