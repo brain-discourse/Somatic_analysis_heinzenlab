@@ -1,3 +1,4 @@
+# Code adapted from Soong, D., Stratford, J., Avet-Loiseau, H. et al. CNV Radar: an improved method for somatic copy number alteration characterization in oncology. BMC Bioinformatics 21, 98 (2020). https://doi.org/10.1186/s12859-020-3397-x
 #!/usr/bin/env Rscript
 init <- Sys.time(); timer <- proc.time();
 
