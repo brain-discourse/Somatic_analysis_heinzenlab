@@ -4,9 +4,12 @@ channels:
   - conda-forge
 dependencies:
   - fastqc
+  - picard
   - bwa
   - gatk
-  - cnvkit
+  - mutect2
+  - cnvradar
   - annovar
   - python=3.8
+  - r=3.6.0
   - snakemake
